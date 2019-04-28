@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>
+            Q-Learning
+        </title>
+        <meta charset="utf-8">
+        <style>
+            table {
+                border-collapse: collapse;
+                border: 2px black solid;
+                font: 12px sans-serif;
+            }
+            td,th {
+                border: 1px black solid;
+                padding: 5px;
+            }
+        </style>
+        <script src="js/jquery.min.js"></script>
+        <script src="js/script.js" type="text/javascript"></script>
+        <script src="js/tabeltocsv.js" type="text/javascript"></script>
+    </head>
+    <body>
+        <button id="proses" onclick="animation()">proses</button>
+        <p id="load">Silahkan Tunggu!!!!!!!!!!!<br>semakin rendah bandwidth anda maka semakin lambat</p>
+        <h2 id="labelqsa">tabel qsa</h2>
+        <table id='table'></table>
+        <br><br>
+        <h2 id="hasil"><b>hasil</b></h2>
+        <table id="thasil"></table>
+        <br><h2 id="reword"></h2>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $("#load").hide();
+                $("#labelqsa").hide();
+                $("#hasil").hide();
+                $.ajax({
+                    url:"DataTugas3ML2019.txt",
+                    dataType:"text",
+                    success:function(d){
+                        dt =  d.split(/\r?\n|\r/);
+                        for (var i = 0; i<dt.length-1; i++) preproses(dt[i].split("\t"));
+                    }
+                });
+                for (var j=0; j<225; j++){
+                    qsa.push([0,0,0,0])
+                }
+            });
+        </script>
+        <script type="text/javascript">
+            function animation(){
+                $("#proses").hide();
+                $("#load").show()
+                setTimeout(proses, 1000);
+            }
+            function proses(){
+                for(var i=0; i<episode; i++){
+                    now=start;
+                    var langkah=100;
+                    while(langkah>0){
+                        act=getact(now);
+                        qsa[now][act]+=upd(now,act);
+                        langkah--;
+                        now=next(now,act);
+                        if (now==finish){langkah=0;}
+                    }
+                }
+                for (var i = 0; i<qsa.length; i++){
+                  $('#table').append("<tr><td>"+(i)+"</td><td>"+qsa[i][0]+"</td><td>"+qsa[i][1]+"</td><td>"+qsa[i][2]+"</td><td>"+qsa[i][3]+"</td></tr>");
+                } 
+                last();
+                $("#load").hide();
+                $("#labelqsa").show();
+                $("#hasil").show();
+            }
+            function last(){
+                var sementara=[];
+                for (var i=0; i<225; i++){sementara.push("x");}
+                now=start;
+                var reword=0;
+                while(now!=finish){
+                    sementara[now]="O";
+                    now=next(now,getact(now));
+                    reword+=n2r(now);
+                }
+                sementara[now]="O";
+                for (var i=0; i<15; i++){
+                    var y="<tr>";
+                    for(var j=0; j<15; j++){
+                        if (sementara[(i*15)+j]=="O"){
+                            y+="<td><div style='border-radius: 50%; height:30px; width: 30px;background-color: deepskyblue'></div></td>";
+                        }else{
+                            y+="<td><div style='border-radius: 50%; height:30px; width: 30px;background-color: black'></div></td>";
+                        }
+                    }
+                    $("#hasil").append(y+"</tr>");
+                }
+                $("#reword").append("REWARD : "+reword);
+            }
+            function download(){
+                donlot("hasil.csv");
+            }
+        </script>
+    </body>
+</html>
